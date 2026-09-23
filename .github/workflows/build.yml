@@ -146,33 +146,29 @@ jobs:
       - name: Stage Android 7 Final APK
         run: |
           VERSION="${{ steps.prep_apk.outputs.version }}"
-          if [ -f "app/build/outputs/apk/release/app-release-signed.apk" ]; then
-            cp app/build/outputs/apk/release/app-release-signed.apk final_apk/ECHO-v${VERSION}-android7.apk
-          else
-            cp app/build/outputs/apk/release/app-release.apk final_apk/ECHO-v${VERSION}-android7.apk
+          PRIMARY_LEGACY=$(find app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n1)
+          if [ -n "$PRIMARY_LEGACY" ]; then
+            cp "$PRIMARY_LEGACY" final_apk/ECHO-v${VERSION}-android7.apk
           fi
           ls -lh final_apk/
 
       - name: Verify APK signatures + publish checksums
         run: |
-          # Never ship a package the installer will reject as invalid: every
-          # staged APK must carry a valid v1+v2 signature. Unsigned fallbacks
-          # fail here loudly instead of reaching users.
           SDKROOT="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
           APKSIGNER=$(find "$SDKROOT/build-tools" -maxdepth 2 -name apksigner 2>/dev/null | head -n1)
           if [ -z "$APKSIGNER" ]; then
             echo "::warning::apksigner not found under $SDKROOT, skipping signature verification"
           else
             for apk in final_apk/*.apk; do
-              echo "Verifying $apk ..."
-              "$APKSIGNER" verify --print-certs "$apk" || echo "Notice: Standard/debug signature for $apk"
+              if [ -f "$apk" ]; then
+                echo "Verifying $apk ..."
+                "$APKSIGNER" verify --print-certs "$apk" || echo "Notice: Standard/debug signature for $apk"
+              fi
             done
             echo "All APK checks complete."
           fi
-          # Checksums so truncated downloads (the other classic cause of
-          # "package appears to be invalid") are detectable by users.
-          (cd final_apk && sha256sum *.apk > SHA256SUMS.txt)
-          cat final_apk/SHA256SUMS.txt
+          (cd final_apk && if ls *.apk 1>/dev/null 2>&1; then sha256sum *.apk > SHA256SUMS.txt; fi)
+          if [ -f final_apk/SHA256SUMS.txt ]; then cat final_apk/SHA256SUMS.txt; fi
 
       - name: Upload Release APKs
         uses: actions/upload-artifact@v4

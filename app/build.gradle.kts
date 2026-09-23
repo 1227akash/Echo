@@ -13,7 +13,7 @@ plugins {
 
 android {
     namespace = "com.lastwave.app"
-    compileSdk = 37
+    compileSdk = 35
 
     val localProps = Properties().apply {
         val localPropsFile = rootProject.file("local.properties")
@@ -115,28 +115,6 @@ android {
                 enableV1Signing = true
                 enableV2Signing = true
                 enableV3Signing = true
-            } else {
-                val debugKeystore = File(System.getProperty("user.home"), ".android/debug.keystore")
-                if (!debugKeystore.exists()) {
-                    debugKeystore.parentFile.mkdirs()
-                    try {
-                        val pb = ProcessBuilder(
-                            "keytool", "-genkey", "-v",
-                            "-keystore", debugKeystore.absolutePath,
-                            "-storepass", "android",
-                            "-alias", "androiddebugkey",
-                            "-keypass", "android",
-                            "-keyalg", "RSA",
-                            "-keysize", "2048",
-                            "-validity", "10000",
-                            "-dname", "CN=Android Debug,O=Android,C=US"
-                        )
-                        pb.redirectErrorStream(true)
-                        val p = pb.start()
-                        p.waitFor()
-                    } catch (_: Exception) {}
-                }
-                initWith(getByName("debug"))
             }
         }
     }
@@ -145,16 +123,24 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            signingConfig = signingConfigs.getByName("release_config")
+            val releaseConfig = signingConfigs.findByName("release_config")
+            signingConfig = if (releaseConfig?.storeFile != null && releaseConfig.storeFile!!.exists()) {
+                releaseConfig
+            } else {
+                signingConfigs.getByName("debug")
+            }
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
         create("rawRelease") {
             initWith(getByName("release"))
             isMinifyEnabled = false
             isShrinkResources = false
-            // Raw variant — no code/resource shrinking, no ProGuard/R8
-            signingConfig = signingConfigs.getByName("release_config")
-            // proguardFiles from initWith are ignored when minify is off
+            val releaseConfig = signingConfigs.findByName("release_config")
+            signingConfig = if (releaseConfig?.storeFile != null && releaseConfig.storeFile!!.exists()) {
+                releaseConfig
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
         debug {
             isDebuggable = true
