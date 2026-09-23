@@ -96,12 +96,18 @@ jobs:
           mkdir -p final_apk
           TAG="${{ inputs.tag_name }}"
           # Universal release (Android 10+, R8 + ProGuard + shrinkResources)
-          PRIMARY_APK=$(find app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n1)
+          PRIMARY_APK=$(find app/build/outputs/apk/release -name "*signed*.apk" 2>/dev/null | head -n1)
+          if [ -z "$PRIMARY_APK" ]; then
+            PRIMARY_APK=$(find app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n1)
+          fi
           if [ -n "$PRIMARY_APK" ]; then
             cp "$PRIMARY_APK" final_apk/ECHO-v${TAG}-universal.apk
           fi
           # Universal uncompressed variant (Android 10+, raw debuggable/unminified)
-          RAW_APK=$(find app/build/outputs/apk/rawRelease -name "*.apk" 2>/dev/null | head -n1)
+          RAW_APK=$(find app/build/outputs/apk/rawRelease -name "*signed*.apk" 2>/dev/null | head -n1)
+          if [ -z "$RAW_APK" ]; then
+            RAW_APK=$(find app/build/outputs/apk/rawRelease -name "*.apk" 2>/dev/null | head -n1)
+          fi
           if [ -n "$RAW_APK" ]; then
             cp "$RAW_APK" final_apk/ECHO-v${TAG}-universal-uncompressed.apk
           fi
@@ -134,7 +140,10 @@ jobs:
       - name: Stage Android 7 Final APK
         run: |
           TAG="${{ inputs.tag_name }}"
-          PRIMARY_LEGACY=$(find app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n1)
+          PRIMARY_LEGACY=$(find app/build/outputs/apk/release -name "*signed*.apk" 2>/dev/null | head -n1)
+          if [ -z "$PRIMARY_LEGACY" ]; then
+            PRIMARY_LEGACY=$(find app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n1)
+          fi
           if [ -n "$PRIMARY_LEGACY" ]; then
             cp "$PRIMARY_LEGACY" final_apk/ECHO-v${TAG}-android7.apk
           fi

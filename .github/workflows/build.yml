@@ -67,8 +67,7 @@ jobs:
           RELEASE_KEY_ALIAS: ${{ secrets.ALIAS || secrets.RELEASE_KEY_ALIAS || 'release_key' }}
           RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || secrets.RELEASE_KEY_PASSWORD }}
         run: |
-          ./gradlew :app:assembleRelease --stacktrace
-          ./gradlew :app:assembleRawRelease --stacktrace || true
+          ./gradlew :app:assembleRelease :app:assembleRawRelease --stacktrace
 
       - name: Sign Release APK with Custom Key (Optional)
         if: env.SIGNING_KEY != ''
@@ -107,16 +106,25 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
           echo "Building APKs for ECHO v$VERSION"
-          # Find primary release APK
-          PRIMARY_APK=$(find app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n1)
+          
+          # Compressed release (Android 10+, R8 + ProGuard + shrinkResources)
+          PRIMARY_APK=$(find app/build/outputs/apk/release -name "*signed*.apk" 2>/dev/null | head -n1)
+          if [ -z "$PRIMARY_APK" ]; then
+            PRIMARY_APK=$(find app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n1)
+          fi
           if [ -n "$PRIMARY_APK" ]; then
             cp "$PRIMARY_APK" final_apk/ECHO-v${VERSION}-release.apk
           fi
-          # Find raw release APK if generated
-          RAW_APK=$(find app/build/outputs/apk/rawRelease -name "*.apk" 2>/dev/null | head -n1)
+
+          # Raw release (Android 10+, no minify, no shrink, no ProGuard)
+          RAW_APK=$(find app/build/outputs/apk/rawRelease -name "*signed*.apk" 2>/dev/null | head -n1)
+          if [ -z "$RAW_APK" ]; then
+            RAW_APK=$(find app/build/outputs/apk/rawRelease -name "*.apk" 2>/dev/null | head -n1)
+          fi
           if [ -n "$RAW_APK" ]; then
             cp "$RAW_APK" final_apk/ECHO-v${VERSION}-raw.apk
           fi
+
           rm -rf app/build/outputs/apk/release/*
 
       - name: Build Android 7.0 Legacy APK (compressed)
@@ -146,7 +154,10 @@ jobs:
       - name: Stage Android 7 Final APK
         run: |
           VERSION="${{ steps.prep_apk.outputs.version }}"
-          PRIMARY_LEGACY=$(find app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n1)
+          PRIMARY_LEGACY=$(find app/build/outputs/apk/release -name "*signed*.apk" 2>/dev/null | head -n1)
+          if [ -z "$PRIMARY_LEGACY" ]; then
+            PRIMARY_LEGACY=$(find app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n1)
+          fi
           if [ -n "$PRIMARY_LEGACY" ]; then
             cp "$PRIMARY_LEGACY" final_apk/ECHO-v${VERSION}-android7.apk
           fi
