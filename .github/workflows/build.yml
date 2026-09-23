@@ -66,8 +66,7 @@ jobs:
           RELEASE_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD || secrets.RELEASE_STORE_PASSWORD }}
           RELEASE_KEY_ALIAS: ${{ secrets.ALIAS || secrets.RELEASE_KEY_ALIAS || 'release_key' }}
           RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || secrets.RELEASE_KEY_PASSWORD }}
-        run: |
-          ./gradlew :app:assembleRelease :app:assembleRawRelease --stacktrace
+        run: ./gradlew assembleRelease assembleRawRelease --stacktrace
 
       - name: Sign Release APK with Custom Key (Optional)
         if: env.SIGNING_KEY != ''
@@ -108,21 +107,27 @@ jobs:
           echo "Building APKs for ECHO v$VERSION"
           
           # Compressed release (Android 10+, R8 + ProGuard + shrinkResources)
-          PRIMARY_APK=$(find app/build/outputs/apk/release -name "*signed*.apk" 2>/dev/null | head -n1)
-          if [ -z "$PRIMARY_APK" ]; then
+          if [ -f "app/build/outputs/apk/release/app-release-signed.apk" ]; then
+            cp app/build/outputs/apk/release/app-release-signed.apk final_apk/ECHO-v${VERSION}-release.apk
+          elif [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
+            cp app/build/outputs/apk/release/app-release.apk final_apk/ECHO-v${VERSION}-release.apk
+          else
             PRIMARY_APK=$(find app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n1)
-          fi
-          if [ -n "$PRIMARY_APK" ]; then
-            cp "$PRIMARY_APK" final_apk/ECHO-v${VERSION}-release.apk
+            if [ -n "$PRIMARY_APK" ]; then
+              cp "$PRIMARY_APK" final_apk/ECHO-v${VERSION}-release.apk
+            fi
           fi
 
           # Raw release (Android 10+, no minify, no shrink, no ProGuard)
-          RAW_APK=$(find app/build/outputs/apk/rawRelease -name "*signed*.apk" 2>/dev/null | head -n1)
-          if [ -z "$RAW_APK" ]; then
+          if [ -f "app/build/outputs/apk/rawRelease/app-rawRelease-signed.apk" ]; then
+            cp app/build/outputs/apk/rawRelease/app-rawRelease-signed.apk final_apk/ECHO-v${VERSION}-raw.apk
+          elif [ -f "app/build/outputs/apk/rawRelease/app-rawRelease.apk" ]; then
+            cp app/build/outputs/apk/rawRelease/app-rawRelease.apk final_apk/ECHO-v${VERSION}-raw.apk
+          else
             RAW_APK=$(find app/build/outputs/apk/rawRelease -name "*.apk" 2>/dev/null | head -n1)
-          fi
-          if [ -n "$RAW_APK" ]; then
-            cp "$RAW_APK" final_apk/ECHO-v${VERSION}-raw.apk
+            if [ -n "$RAW_APK" ]; then
+              cp "$RAW_APK" final_apk/ECHO-v${VERSION}-raw.apk
+            fi
           fi
 
           rm -rf app/build/outputs/apk/release/*
@@ -136,7 +141,7 @@ jobs:
           RELEASE_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD || secrets.RELEASE_STORE_PASSWORD }}
           RELEASE_KEY_ALIAS: ${{ secrets.ALIAS || secrets.RELEASE_KEY_ALIAS || 'release_key' }}
           RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || secrets.RELEASE_KEY_PASSWORD }}
-        run: ./gradlew :app:assembleRelease -PminSdk=24 --stacktrace || true
+        run: ./gradlew assembleRelease -PminSdk=24 --stacktrace
 
       - name: Sign Android 7 Legacy APK with Custom Key (Optional)
         if: env.SIGNING_KEY != ''
@@ -154,12 +159,15 @@ jobs:
       - name: Stage Android 7 Final APK
         run: |
           VERSION="${{ steps.prep_apk.outputs.version }}"
-          PRIMARY_LEGACY=$(find app/build/outputs/apk/release -name "*signed*.apk" 2>/dev/null | head -n1)
-          if [ -z "$PRIMARY_LEGACY" ]; then
+          if [ -f "app/build/outputs/apk/release/app-release-signed.apk" ]; then
+            cp app/build/outputs/apk/release/app-release-signed.apk final_apk/ECHO-v${VERSION}-android7.apk
+          elif [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
+            cp app/build/outputs/apk/release/app-release.apk final_apk/ECHO-v${VERSION}-android7.apk
+          else
             PRIMARY_LEGACY=$(find app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -n1)
-          fi
-          if [ -n "$PRIMARY_LEGACY" ]; then
-            cp "$PRIMARY_LEGACY" final_apk/ECHO-v${VERSION}-android7.apk
+            if [ -n "$PRIMARY_LEGACY" ]; then
+              cp "$PRIMARY_LEGACY" final_apk/ECHO-v${VERSION}-android7.apk
+            fi
           fi
           ls -lh final_apk/
 
@@ -171,15 +179,13 @@ jobs:
             echo "::warning::apksigner not found under $SDKROOT, skipping signature verification"
           else
             for apk in final_apk/*.apk; do
-              if [ -f "$apk" ]; then
-                echo "Verifying $apk ..."
-                "$APKSIGNER" verify --print-certs "$apk" || echo "Notice: Standard/debug signature for $apk"
-              fi
+              echo "Verifying $apk ..."
+              "$APKSIGNER" verify --print-certs "$apk" > /dev/null || { echo "::error::APK failed signature verification: $apk"; exit 1; }
             done
-            echo "All APK checks complete."
+            echo "All APK signatures valid."
           fi
-          (cd final_apk && if ls *.apk 1>/dev/null 2>&1; then sha256sum *.apk > SHA256SUMS.txt; fi)
-          if [ -f final_apk/SHA256SUMS.txt ]; then cat final_apk/SHA256SUMS.txt; fi
+          (cd final_apk && sha256sum *.apk > SHA256SUMS.txt)
+          cat final_apk/SHA256SUMS.txt
 
       - name: Upload Release APKs
         uses: actions/upload-artifact@v4
