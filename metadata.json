@@ -1,0 +1,6 @@
+{
+  "name": "ECHO",
+  "description": "ECHO - Open-source Android music streaming player powered by YouTube Music and Last.fm scrobbler. Made by Akash.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

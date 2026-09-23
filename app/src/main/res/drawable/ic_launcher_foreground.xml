@@ -1,0 +1,19 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- ECHO Acoustic soundwave bars in bright white against the vibrant blue background -->
+    <path
+        android:fillColor="#E0F2FE"
+        android:pathData="M23.62,40.46 A4.47,4.47 0 0 1 32.57,40.46 L32.57,71.80 A4.47,4.47 0 0 1 23.62,71.80 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M41.52,25.59 A4.59,4.59 0 0 1 50.71,25.59 L50.71,82.41 A4.59,4.59 0 0 1 41.52,82.41 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M59.22,30.48 A4.67,4.67 0 0 1 68.57,30.48 L68.57,76.61 A4.67,4.67 0 0 1 59.22,76.61 Z" />
+    <path
+        android:fillColor="#BAE6FD"
+        android:pathData="M74.32,38.41 A5.03,5.03 0 0 1 84.38,38.41 L84.38,68.65 A5.03,5.03 0 0 1 74.32,68.65 Z" />
+</vector>
