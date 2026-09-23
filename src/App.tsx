@@ -97,6 +97,8 @@ export default function App() {
   const [scrobbleCount, setScrobbleCount] = useState(1420);
   const [scrobbleStatus, setScrobbleStatus] = useState<'Active' | 'Synced'>('Active');
   const [showAboutModal, setShowAboutModal] = useState(false);
+  const [showApkModal, setShowApkModal] = useState(false);
+  const [showGithubModal, setShowGithubModal] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const track = SAMPLE_TRACKS[currentTrackIndex];
@@ -243,23 +245,28 @@ export default function App() {
         </nav>
 
         {/* Right Action buttons */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowApkModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/30 transition-all active:scale-95"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Download APK / Project</span>
+          </button>
           <button
             onClick={() => setShowAboutModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-950/60 border border-blue-800/50 text-blue-300 hover:bg-blue-900/50 transition-colors"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-950/60 border border-blue-800/50 text-blue-300 hover:bg-blue-900/50 transition-colors"
           >
             <Info className="w-3.5 h-3.5" />
             <span>About</span>
           </button>
-          <a
-            href="https://github.com/akashtiwari1227/ECHO"
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20 transition-colors"
+          <button
+            onClick={() => setShowGithubModal(true)}
+            className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20 transition-colors"
           >
             <GithubIcon className="w-4 h-4" />
-            <span className="hidden sm:inline">GitHub Repository</span>
-          </a>
+            <span>GitHub</span>
+          </button>
         </div>
       </header>
 
@@ -869,6 +876,188 @@ export default function App() {
                   Close
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* APK & Project Source Download Modal */}
+      {showApkModal && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#0e162c] border border-blue-900/60 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl relative overflow-hidden">
+            <div className="flex items-center justify-between pb-4 border-b border-blue-950">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                  <Download className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Get ECHO Android App</h3>
+                  <p className="text-xs text-slate-400">Version 4.2.0 • Made by Akash</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowApkModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-5 space-y-4">
+              {/* Option 1: Direct Download Source Package */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950/60 to-emerald-950/40 border border-emerald-500/30">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full">
+                      Instant Download
+                    </span>
+                    <h4 className="font-bold text-sm text-white mt-1.5">
+                      Full Android Project Package (.ZIP)
+                    </h4>
+                    <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                      Complete ready-to-build Android source code with Kotlin, Jetpack Compose, C++ JNI bridge, resources, and Gradle build files (10.5 MB).
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3.5">
+                  <a
+                    href="/ECHO-v4.2.0-project.zip"
+                    download="ECHO-v4.2.0-project.zip"
+                    className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download ECHO-v4.2.0-project.zip (10.5 MB)
+                  </a>
+                </div>
+              </div>
+
+              {/* Option 2: AI Studio Cloud Build */}
+              <div className="p-4 rounded-2xl bg-slate-900/80 border border-blue-900/40">
+                <h4 className="font-bold text-xs text-slate-200 flex items-center gap-2">
+                  <Smartphone className="w-4 h-4 text-blue-400" />
+                  Generate APK via AI Studio
+                </h4>
+                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  In the top-right header menu of AI Studio, click on <strong>Project Settings / Export</strong> to directly download the signed APK or export to GitHub repository.
+                </p>
+              </div>
+
+              {/* Option 3: Terminal Build Command */}
+              <div className="p-4 rounded-2xl bg-[#080d1a] border border-blue-950">
+                <h4 className="font-bold text-xs text-slate-300 flex items-center gap-2 mb-1.5">
+                  <Terminal className="w-4 h-4 text-sky-400" />
+                  Compile with Gradle (1 Command)
+                </h4>
+                <div className="p-2.5 rounded-lg bg-black/60 font-mono text-[11px] text-emerald-400 border border-blue-950 select-all">
+                  ./gradlew assembleRelease
+                </div>
+                <p className="text-[11px] text-slate-400 mt-2">
+                  Output: <code className="text-slate-300">app/build/outputs/apk/release/app-release.apk</code>
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 pt-3 border-t border-blue-950 flex justify-end">
+              <button
+                onClick={() => setShowApkModal(false)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* GitHub 404 Fix & Repository Setup Modal */}
+      {showGithubModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#0e162c] border border-blue-800/60 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl relative overflow-hidden">
+            <div className="flex items-center justify-between pb-4 border-b border-blue-950">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center">
+                  <GithubIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">GitHub Repository Setup</h3>
+                  <p className="text-xs text-slate-400">Why does https://github.com/akashtiwari1227/ECHO show 404?</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowGithubModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-5 space-y-4">
+              {/* Alert explaining 404 */}
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
+                <div className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-bold">
+                  !
+                </div>
+                <div className="text-xs text-amber-200/90 leading-relaxed">
+                  <strong>404 Error Ka Reason:</strong> GitHub par jab tak koi repository create nahi ki jati ya publish nahi hoti, tab tak wo link 404 Not Found dikhata hai.
+                </div>
+              </div>
+
+              {/* Step 1: 1-Click Push from AI Studio */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950/70 to-indigo-950/50 border border-blue-700/40">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 bg-blue-500/20 px-2 py-0.5 rounded-full">
+                  Step 1 (Sabse Aasan)
+                </span>
+                <h4 className="font-bold text-sm text-white mt-1.5">
+                  AI Studio se Direct GitHub me Push karein
+                </h4>
+                <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                  Is screen ke top-right bar me <strong>"Export / Push to GitHub"</strong> button par click karein. Apna GitHub login karein aur repository name <code>ECHO</code> dekar <strong>Push</strong> dabayein.
+                </p>
+              </div>
+
+              {/* Step 2: Or create on GitHub manually */}
+              <div className="p-4 rounded-2xl bg-slate-900/80 border border-blue-950">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full">
+                  Step 2 (Manual Setup)
+                </span>
+                <h4 className="font-bold text-xs text-slate-200 mt-1.5">
+                  GitHub.com par new repository banayein:
+                </h4>
+                <ol className="text-xs text-slate-400 mt-2 space-y-1.5 list-decimal list-inside leading-relaxed">
+                  <li><strong>github.com/new</strong> par jayein.</li>
+                  <li>Repository Name me <code>ECHO</code> likhein.</li>
+                  <li><strong>Public</strong> select karein.</li>
+                  <li>"Add README" tick <strong>mat</strong> karein.</li>
+                  <li><strong>Create repository</strong> button click karein!</li>
+                </ol>
+                <div className="mt-3">
+                  <a
+                    href="https://github.com/new"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition-colors"
+                  >
+                    Open github.com/new ↗
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 pt-3 border-t border-blue-950 flex items-center justify-between">
+              <a
+                href="https://github.com/akashtiwari1227/ECHO"
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-blue-400 hover:underline flex items-center gap-1"
+              >
+                Open Repo Link Anyway ↗
+              </a>
+              <button
+                onClick={() => setShowGithubModal(false)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
