@@ -116,6 +116,26 @@ android {
                 enableV2Signing = true
                 enableV3Signing = true
             } else {
+                val debugKeystore = File(System.getProperty("user.home"), ".android/debug.keystore")
+                if (!debugKeystore.exists()) {
+                    debugKeystore.parentFile.mkdirs()
+                    try {
+                        val pb = ProcessBuilder(
+                            "keytool", "-genkey", "-v",
+                            "-keystore", debugKeystore.absolutePath,
+                            "-storepass", "android",
+                            "-alias", "androiddebugkey",
+                            "-keypass", "android",
+                            "-keyalg", "RSA",
+                            "-keysize", "2048",
+                            "-validity", "10000",
+                            "-dname", "CN=Android Debug,O=Android,C=US"
+                        )
+                        pb.redirectErrorStream(true)
+                        val p = pb.start()
+                        p.waitFor()
+                    } catch (_: Exception) {}
+                }
                 initWith(getByName("debug"))
             }
         }
