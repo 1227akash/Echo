@@ -1,4 +1,4 @@
-name: Build ECHO APK
+name: Build LastWave APK
 
 on:
   push:
