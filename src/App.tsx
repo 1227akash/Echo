@@ -772,7 +772,7 @@ export default function App() {
                     Includes project hero banner, badges, 6 high-res app screenshots, feature breakdown, tech stack, quick start, build instructions, and developer credit: <strong>Made by Akash</strong>.
                   </p>
                   <pre className="p-3 rounded-xl bg-black/40 text-[11px] font-mono text-slate-300 overflow-x-auto border border-blue-950">
-                    git clone https://github.com/akashtiwari1227/ECHO.git{'\n'}
+                    git clone https://github.com/1227akash/Echo.git{'\n'}
                     cd ECHO{'\n'}
                     ./gradlew assembleRelease
                   </pre>
@@ -861,7 +861,7 @@ export default function App() {
 
               <div className="mt-6 pt-4 border-t border-blue-950 flex flex-col gap-2">
                 <a
-                  href="https://github.com/akashtiwari1227/ECHO"
+                  href="https://github.com/1227akash/Echo"
                   target="_blank"
                   rel="noreferrer"
                   className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2"
@@ -980,7 +980,7 @@ export default function App() {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-white">GitHub Repository Setup</h3>
-                  <p className="text-xs text-slate-400">Why does https://github.com/akashtiwari1227/ECHO show 404?</p>
+                  <p className="text-xs text-slate-400">Why does https://github.com/1227akash/Echo show 404?</p>
                 </div>
               </div>
               <button
@@ -1045,7 +1045,7 @@ export default function App() {
 
             <div className="mt-5 pt-3 border-t border-blue-950 flex items-center justify-between">
               <a
-                href="https://github.com/akashtiwari1227/ECHO"
+                href="https://github.com/1227akash/Echo"
                 target="_blank"
                 rel="noreferrer"
                 className="text-xs text-blue-400 hover:underline flex items-center gap-1"
